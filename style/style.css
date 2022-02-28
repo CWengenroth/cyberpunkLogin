@@ -53,6 +53,17 @@ body::before {
     position: relative;
 }
 
+.form-control-div::before {
+    content: "";
+    position: absolute;
+    right: -5%;
+    top: -2px;
+    width: 110%;
+    height: 2px;
+    background: yellow;
+    animation: slide_out 0.4s ease-out 0s normal forwards;
+}
+
 .form-control-wrapper {
     overflow: hidden;
     position: relative;
@@ -70,12 +81,24 @@ body::before {
     height: 6em;
 }
 
+.form-control-wrapper::after {
+    content: "";
+    position: absolute;
+    background: yellow;
+    top: -5%;
+    right: -5%;
+    width: 110%;
+    height: 110%;
+    transform: skewX(-45deg);
+    animation: slide_out 0.5s ease-out 0.3s normal forwards;
+}
+
 .form-control {
     border: 1px solid black;
     background-color: black;
     outline: none;
     caret-color: var(--accent-color-cyan);
-    color: var(--accent-color-purple);
+    color: var(--accent-color-cyan);
     font-size: 1.3em;
     line-height: 1.4em;
     padding-left: 4px;
@@ -89,7 +112,17 @@ body::before {
     right: 0;
     line-height: 1.6em;
     font-size: 1.6em;
+    text-align: right;
     font-weight: bold;
+}
+
+@keyframes slide_out {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
 }
 
 @media (max-width: 600px) {
