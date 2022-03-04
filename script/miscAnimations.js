@@ -47,176 +47,169 @@ const Katakana = [
     "ン",
 ];
 
-const typeWriterList = [];
+export class KatakanaAnimations {
+    /**
+     * @param {HTMLElement} element
+     * @param {string} fontColor
+     * @param {number} fontSize measured in em units
+     */
+    constructor(element, fontColor, fontSize) {
+        this.canvasDiv = element;
+        this.fontColor = fontColor;
+        this.fontSize = fontSize;
 
-class TypeWriter {
-    constructor(elementId, textValue, callback = null) {
-        this.elementId = elementId;
-        this.textValue = textValue;
-        this.writerIndex = 0;
-        this.speed = 0;
-        this.element = $(this.elementId);
-        this.inPlaceCycle;
-        this.inPlaceCounter = this.inPlaceCycle;
-        this.callback = callback;
-        typeWriterList.push(this);
+        this.isAnimationOn = false;
+        this.canvasContext = undefined;
     }
 
-    show() {
-        // Anzahl inPlaceCycle teilweise random
-        if (this.inPlaceCycle === undefined) {
-            this.inPlaceCycle = Math.floor(
-                Math.random() + 13 / this.textValue.length
-            );
+    createCanvas() {
+        // canvas-Element erstellen ... und im DOM-Tree einfuegen
+        const canvas = document.createElement("canvas");
+        canvas.setAttribute("id", "canvas");
+        canvas.setAttribute("width", this.canvasDiv.offsetWidth);
+        canvas.setAttribute("height", this.canvasDiv.offsetHeight);
+        canvas.style.position = "absolute";
+        canvas.style.zIndex = "10";
+        canvas.style.left = `${this.canvasDiv.offsetLeft}px`;
+
+        // ... Context vorbereiten ...
+        this.canvasContext = canvas.getContext("2d");
+        this.canvasContext.fillStyle = this.fontColor;
+        this.canvasContext.font = `${this.fontSize}px Orbitron`;
+
+        // ... und im DOM-Tree einfuegen
+        this.canvasDiv.append(canvas);
+    }
+
+    setStartingValues() {
+        this.isAnimationOn = true;
+        // TODO Canvas reset / delete canvas element in HTML
+    }
+
+    init() {
+        this.setStartingValues();
+        this.createCanvas();
+    }
+
+    drawMatrixEffect(xCoordinate, yCoordinate, katakanaSymbol, animationSpeed) {
+        setTimeout(() => {
+            let alphaIncrease = 0.1;
+
+            let intervalID = setInterval(() => {
+                if (alphaIncrease < 1.0) {
+                    this.canvasContext.fillStyle = `rgba(255,255,0, ${alphaIncrease})`;
+                    this.canvasContext.fillRect(
+                        xCoordinate,
+                        yCoordinate - this.fontSize,
+                        this.fontSize + 2,
+                        this.fontSize + 2
+                    );
+
+                    alphaIncrease += alphaIncrease;
+                } else {
+                    this.canvasContext.clearRect(
+                        xCoordinate,
+                        yCoordinate - this.fontSize,
+                        this.fontSize + 2,
+                        this.fontSize + 2
+                    );
+                    clearInterval(intervalID);
+                }
+            }, animationSpeed);
+        }, 7 * animationSpeed);
+
+        this.canvasContext.fillStyle = this.fontColor;
+        this.canvasContext.fillText(katakanaSymbol, xCoordinate, yCoordinate);
+    }
+
+    animateMatrixEffekt(animationSpeed) {
+        // Anzahl der Columns ermitteln (speichert die X-Koordinaten fuer Matrix Effekt)
+        let maxColumns = Math.floor(
+            (this.canvasDiv.offsetWidth + 4 * this.fontSize) / this.fontSize
+        );
+
+        let initialCoordinateX =
+            -this.fontSize + Math.random() * (this.canvasDiv.offsetWidth / 2);
+
+        let arrXCoordinates = Array(maxColumns).fill(0);
+        arrXCoordinates.forEach((element, index) => {
+            arrXCoordinates[index] =
+                index == 0
+                    ? initialCoordinateX
+                    : arrXCoordinates[index - 1] + this.fontSize;
+        });
+
+        // Rechte Limitierung = Element-Breite + Pufferzone - Random factor
+        let rLimit =
+            this.canvasDiv.offsetWidth + this.fontSize - Math.random() * 400;
+
+        let fixedY = Math.max(
+            this.fontSize * 1.5,
+            Math.random() * (this.canvasDiv.offsetHeight - this.fontSize * 1.5)
+        );
+
+        let arrRandomKatakana = [];
+
+        for (let i = 0; i < arrXCoordinates.length; i++) {
+            let randomIndex = Math.floor(Math.random() * Katakana.length);
+            let randomSymbol = Katakana[randomIndex];
+            arrRandomKatakana.push(randomSymbol);
         }
 
-        // Speed abh. von Anzahl der Zeichn und inPlaceCycle auf 1000 ms verteilt
-        if (!this.speed) {
-            this.speed =
-                1000 / (this.textValue.length * Math.max(1, this.inPlaceCycle));
-        }
+        let intervalID = setInterval(() => {
+            let nextX = arrXCoordinates.shift();
+            let nextKatakana = arrRandomKatakana.shift();
 
-        if (this.writerIndex < this.textValue.length) {
-            let randomKatakana =
-                Katakana[Math.floor(Math.random() * Katakana.length)];
-
-            let actualText = this.element.text().substr(0, this.writerIndex);
-
-            // Ersetzt endstaendiges Katakana bis inPlaceCounter bei 0 ist
-            // anstatt den actualText weiter aufzubauen
-            if (this.inPlaceCounter > 0) {
-                this.element.html(actualText + randomKatakana);
-                this.inPlaceCounter--;
-            }
-
-            // Sonderzeichen die mit & anfangen gesondert behandeln
-            else if (this.textValue.charAt(this.writerIndex) == "&") {
-                this.element.html(
-                    actualText +
-                        this.textValue.substring(
-                            this.writerIndex,
-                            this.writerIndex + 4
-                        ) +
-                        randomKatakana
+            if (nextX && nextX < rLimit && nextKatakana && this.isAnimationOn) {
+                this.drawMatrixEffect(
+                    nextX,
+                    fixedY,
+                    nextKatakana,
+                    animationSpeed
                 );
-                this.writerIndex += 4;
-                this.inPlaceCounter = this.inPlaceCycle;
             } else {
-                // Der Standardfall
-                this.element.html(
-                    actualText +
-                        this.textValue.charAt(this.writerIndex++) +
-                        randomKatakana
-                );
-                this.inPlaceCounter = this.inPlaceCycle; // Counter resetten
+                clearInterval(intervalID);
             }
+        }, animationSpeed);
+    }
 
-            setTimeout(() => {
-                this.show();
-            }, this.speed);
-        } else {
-            // Katakana am Ende entfernen, wenn Text vollständig angezeigt wird
-            this.element.html(
-                this.element.text().substr(0, this.element.text().length - 1)
-            );
+    /**
+     * @param {number} numAnimations
+     * @param {number} animationSpeed
+     */
+    initiateMatrixeffect(numAnimations, animationSpeed) {
+        this.canvasContext.fillStyle = "rgb(255,255,0)";
+        this.canvasContext.fillRect(
+            0,
+            0,
+            this.canvasDiv.offsetWidth,
+            this.canvasDiv.offsetHeight
+        );
 
-            this.writerIndex = 0;
-            this.callback ? this.callback.call() : null; // Ggf. callback rufen
+        for (let j = 0; j < numAnimations; j++) {
+            let IntervalID = setInterval(() => {
+                if (this.isAnimationOn) {
+                    this.animateMatrixEffekt(animationSpeed);
+                }
+            }, animationSpeed * 4);
         }
     }
-}
 
-const descriptionDegree = new TypeWriter("#description_degree", "");
-const degree = new TypeWriter("#degree", "", () => {
-    $("#degree-city-subdiv").addClass("fade-in");
-});
-const city = new TypeWriter("#city", "");
-const time = new TypeWriter("#time", "");
-const date = new TypeWriter("#date", "");
-const label_pressure = new TypeWriter("#label_pressure", "");
-const pressure = new TypeWriter("#pressure", "");
-const label_humidity = new TypeWriter("#label_humidity", "");
-const humidity = new TypeWriter("#humidity", "");
-
-const btn_led = new TypeWriter("#btn_led", "LED PIR starten");
-
-const btn_disk_usage = new TypeWriter(
-    "#btn_disk_usage",
-    "Speicherbelegung anzeigen"
-);
-
-const btn_cpu_temp = new TypeWriter(
-    "#btn_cpu_temp",
-    "Chip Temperatur anzeigen"
-);
-
-const label_status = new TypeWriter("#status", "");
-
-function init(callback) {
-    $("#buttons").hide();
-
-    time.textValue = getTime();
-    //   time.show();
-    showTime();
-
-    showDate();
-
-    descriptionDegree.textValue = "Bedeckt kalt, gefühlt 11.5&deg";
-    degree.textValue = "12.0&deg";
-    city.textValue = "Peißenberg";
-    label_pressure.textValue = "Druck";
-    pressure.textValue = "1024 hPa";
-    label_humidity.textValue = "Luftfeuchtigkeit";
-    humidity.textValue = "45.5%";
-    label_wind.textValue = "Wind";
-    wind.textValue = "300 m/s";
-    label_clouds.textValue = "Wolken";
-    clouds.textValue = "40%";
-    label_rain.textValue = "Regen";
-    rain.textValue = "200mm";
-    label_snow.textValue = "Schnee";
-    snow.textValue = "200mm";
-
-    callback.call();
-}
-
-function startUp() {
-    typeWriterList.forEach((tw) => tw.show());
-
-    $("#buttons").show();
-}
-
-document.addEventListener("DOMContentLoaded", function (event) {
-    //do work TODO replace $(document).ready(...)
-});
-
-$(document).ready(function () {
-    init(function () {
-        startUp();
-    });
-
-    /* Events */
-    btn_led.element.click(() => {
-        if (!led_running) {
-            btn_led.textValue = "LED PIR stoppen";
-            led_running = true;
-        } else {
-            btn_led.textValue = "LED PIR starten";
-            led_running = false;
+    /**
+     * @param {string} animationType
+     * @param {number} numAnimations
+     * @param {number} animationSpeed
+     */
+    animate(animationType, numAnimations, animationSpeed) {
+        switch (animationType) {
+            case "matrixEvenlySpaced":
+            default:
+                this.initiateMatrixeffect(numAnimations, animationSpeed);
+                break;
         }
+    }
 
-        btn_led.show();
-    });
-
-    btn_disk_usage.element.click(() => {
-        label_status.textValue = "Disk-Usage: 25%";
-        label_status.inPlaceCycle = 0; // Konsolenoutput ohne inPlaceCycle
-        label_status.show();
-    });
-
-    btn_cpu_temp.element.click(() => {
-        label_status.textValue = "Chip Temperature: 36°";
-        label_status.inPlaceCycle = 0; // Konsolenoutput ohne inPlaceCycle
-        label_status.show();
-    });
-});
+    pause() {
+        this.isAnimationOn = false;
+    }
+}

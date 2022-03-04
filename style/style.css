@@ -3,8 +3,8 @@
 html {
     box-sizing: border-box;
     font-family: "Orbitron", sans-serif;
-    --accent-color-purple: rgb(206, 17, 133);
-    --accent-color-cyan: rgba(33, 226, 226, 1);
+    --accent-color-purple: #ce1185;
+    --accent-color-cyan: #21e2e2;
 }
 
 body::before {
@@ -51,6 +51,7 @@ body::before {
 .form-control-div {
     border-top: 2px solid var(--accent-color-purple);
     position: relative;
+    font-size: inherit;
 }
 
 .form-control-div::before {
