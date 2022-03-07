@@ -7,6 +7,21 @@ html {
     --accent-color-cyan: #21e2e2;
 }
 
+body {
+    padding: 0;
+    overflow-x: hidden;
+}
+
+#bg-canvas-div {
+    position: fixed;
+    z-index: -1;
+    width: 100vw;
+    height: 100vh;
+    bottom: 0vh;
+    left: 0vw;
+    margin: 0;
+}
+
 body::before {
     content: "";
     position: absolute;
@@ -29,6 +44,8 @@ body::before {
 }
 
 #login-main-container {
+    z-index: 2;
+
     width: 70%;
     max-width: 800px;
     height: 50vh;
@@ -39,8 +56,8 @@ body::before {
     border-radius: 2px;
 
     background-color: yellow;
-    box-shadow: 13px 7px 5px var(--accent-color-cyan),
-        -30px -30px 60px var(--accent-color-purple);
+    box-shadow: 7px 7px 10px var(--accent-color-cyan),
+        -5px -5px 10px var(--accent-color-purple);
 
     display: flex;
     flex-direction: column;
