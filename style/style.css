@@ -134,6 +134,15 @@ body::before {
     font-weight: bold;
 }
 
+.console-canvas {
+    height: 30%;
+    width: 60%;
+    max-width: 270px;
+
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
 @keyframes slide_out {
     from {
         width: 100%;
