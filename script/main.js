@@ -1,19 +1,19 @@
 import { MatrixKatakanaRandom } from "./matrixKatakanaEffects.js";
 import { ConsoleKatakana } from "./consoleKatakanaEffects.js";
 
-let consoleDiv = document.querySelector(".console-canvas");
+// let consoleDiv = document.querySelector(".console-canvas");
 
-let consoleKatakana = new ConsoleKatakana(
-    consoleDiv,
-    "rgba(33, 226, 226, 1)",
-    "rgba(0,0,0, 0)",
-    "Orbitron",
-    16,
-    0,
-    true
-);
-consoleKatakana.initParameters();
-consoleKatakana.initConsoleffect();
+// let consoleKatakana = new ConsoleKatakana(
+//     consoleDiv,
+//     "rgba(33, 226, 226, 1)",
+//     "rgba(0,0,0, 0)",
+//     "Orbitron",
+//     16,
+//     0,
+//     true
+// );
+// consoleKatakana.initParameters();
+// consoleKatakana.initConsoleffect();
 
 let bgCanvasDiv = document.querySelector("#bg-canvas-div");
 let matrixKatakanaRandom = new MatrixKatakanaRandom(
